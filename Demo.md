@@ -178,14 +178,12 @@ cat medium_blast_results.txt
 
 
 
-好的，這是一個非常棒的下一步！從序列資料建立演化樹是生物資訊分析中非常核心且有趣的一環。
+下一步！從序列資料建立演化樹!
 
 要將之前下載的 12 條 16S rRNA 序列轉換成演化樹，我們需要使用到一些不同的工具。BLAST 和 MMseqs2 主要用於序列比對和搜尋，而建立演化樹則需要經過以下兩個主要步驟：
 
 1.  **多序列比對 (Multiple Sequence Alignment, MSA)**：將所有序列進行比對，找出它們之間保守和變異的區域。這一步是構建演化樹的基礎。
 2.  **演化樹建構 (Phylogenetic Tree Construction)**：根據多序列比對的結果，利用演化模型推斷序列之間的親緣關係，並繪製成樹狀圖。
-
-由於我無法直接執行外部的圖形化程式或模擬這些工具的完整安裝過程，但我可以為你提供最常用的**命令列 (Command-Line)** 工具和指令，讓你可以在你的 Linux 環境中逐步完成。
 
 -----
 
@@ -211,7 +209,7 @@ cat medium_blast_results.txt
 
 2.  **演化樹建構工具：FastTree** (或 IQ-TREE, RAxML)
 
-      * **FastTree** 速度極快，適合較大的數據集，對於 demo 和初步分析非常方便。
+      * **FastTree** 速度極快，適合較大的數據集。
       * **安裝指令 (Ubuntu/Debian 系統)：**
         ```bash
         sudo apt install fasttree
@@ -258,8 +256,6 @@ FastTree -nt -gtr -gamma -out phylogenetic_tree.nwk aligned_sequences.fasta
   * `-gamma`: 考慮不同位點演化速率的變異 (Gamma 分佈)。
   * `-out phylogenetic_tree.nwk`: 將建構好的演化樹輸出到名為 `phylogenetic_tree.nwk` 的檔案。
       * `.nwk` 副檔名代表 Newick 格式，這是演化樹最常見的文字格式。
-
-這個指令會執行得非常快，尤其是在只有 12 條序列的情況下。
 
 -----
 

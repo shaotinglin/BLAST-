@@ -174,3 +174,161 @@ cat medium_blast_results.txt
     
 
 **至此，你已經完成了一次從無到有的完整本地端 BLAST 分析！**
+
+
+
+
+好的，這是一個非常棒的下一步！從序列資料建立演化樹是生物資訊分析中非常核心且有趣的一環。
+
+要將之前下載的 12 條 16S rRNA 序列轉換成演化樹，我們需要使用到一些不同的工具。BLAST 和 MMseqs2 主要用於序列比對和搜尋，而建立演化樹則需要經過以下兩個主要步驟：
+
+1.  **多序列比對 (Multiple Sequence Alignment, MSA)**：將所有序列進行比對，找出它們之間保守和變異的區域。這一步是構建演化樹的基礎。
+2.  **演化樹建構 (Phylogenetic Tree Construction)**：根據多序列比對的結果，利用演化模型推斷序列之間的親緣關係，並繪製成樹狀圖。
+
+由於我無法直接執行外部的圖形化程式或模擬這些工具的完整安裝過程，但我可以為你提供最常用的**命令列 (Command-Line)** 工具和指令，讓你可以在你的 Linux 環境中逐步完成。
+
+-----
+
+### **演化樹建構教學：從多序列比對到樹狀圖**
+
+#### **事前準備：你需要額外安裝的工具**
+
+請注意，以下兩個工具你需要先安裝。它們通常在大多數 Linux 發行版的軟體倉庫中都可以找到，或者你可以手動下載安裝（類似於 BLAST+ 的手動安裝方式）。
+
+1.  **多序列比對工具：MAFFT** (或 Clustal Omega)
+
+      * **MAFFT** 以其速度和準確性而聞名。
+      * **安裝指令 (Ubuntu/Debian 系統)：**
+        ```bash
+        sudo apt update
+        sudo apt install mafft
+        ```
+      * **安裝指令 (CentOS/Fedora 系統)：**
+        ```bash
+        sudo yum install mafft # 或 sudo dnf install mafft
+        ```
+      * **驗證安裝：** `mafft --version`
+
+2.  **演化樹建構工具：FastTree** (或 IQ-TREE, RAxML)
+
+      * **FastTree** 速度極快，適合較大的數據集，對於 demo 和初步分析非常方便。
+      * **安裝指令 (Ubuntu/Debian 系統)：**
+        ```bash
+        sudo apt install fasttree
+        ```
+      * **安裝指令 (CentOS/Fedora 系統)：**
+        ```bash
+        sudo yum install fasttree # 或 sudo dnf install fasttree
+        ```
+      * **驗證安裝：** `fasttree -h`
+
+-----
+
+### **步驟一：執行多序列比對 (使用 MAFFT)**
+
+我們將使用之前下載的 `more_sequences.fasta` 檔案，它包含了 12 條 16S rRNA 序列。
+
+```bash
+# 執行 MAFFT 多序列比對
+mafft --auto more_sequences.fasta > aligned_sequences.fasta
+```
+
+  * `mafft`: 呼叫 MAFFT 程式。
+  * `--auto`: 讓 MAFFT 自動選擇最適合比對策略。
+  * `more_sequences.fasta`: 輸入檔案 (包含所有 12 條序列)。
+  * `>`: 將 MAFFT 的輸出導向到一個新的檔案。
+  * `aligned_sequences.fasta`: 輸出檔案，包含了所有已經比對好的序列。
+
+你可以使用 `cat aligned_sequences.fasta` 查看比對後的序列，你會看到序列中多了許多 `-` (gap)，表示插入或刪除。
+
+-----
+
+### **步驟二：建構演化樹 (使用 FastTree)**
+
+接下來，我們將使用 MAFFT 輸出比對好的序列檔案 (`aligned_sequences.fasta`)，透過 FastTree 來建構演化樹。
+
+```bash
+# 執行 FastTree 建構演化樹
+FastTree -nt -gtr -gamma -out phylogenetic_tree.nwk aligned_sequences.fasta
+```
+
+  * `FastTree`: 呼叫 FastTree 程式。
+  * `-nt`: 指定輸入序列是核酸 (nucleotide) 類型。
+  * `-gtr`: 使用廣義時間可逆 (General Time Reversible) 模型，這是核酸序列演化常用的模型。
+  * `-gamma`: 考慮不同位點演化速率的變異 (Gamma 分佈)。
+  * `-out phylogenetic_tree.nwk`: 將建構好的演化樹輸出到名為 `phylogenetic_tree.nwk` 的檔案。
+      * `.nwk` 副檔名代表 Newick 格式，這是演化樹最常見的文字格式。
+
+這個指令會執行得非常快，尤其是在只有 12 條序列的情況下。
+
+-----
+
+### **步驟三：查看演化樹檔案**
+
+現在，你的資料夾中應該有一個 `phylogenetic_tree.nwk` 的檔案。它是一個純文字檔，但內容是 Newick 格式，看起來像一串用括號和逗號組成的字串。
+
+```bash
+cat phylogenetic_tree.nwk
+```
+
+**範例 Newick 格式 (這不是實際結果，僅為示意)：**
+
+```
+((A:0.1,B:0.2):0.05,(C:0.3,D:0.4):0.01);
+```
+
+這串文字就代表了序列之間的關係和分支長度。
+
+-----
+
+### **步驟四：演化樹視覺化 (重要！)**
+
+雖然我們已經生成了演化樹的數據 (`.nwk` 檔案)，但要把它變成直觀的樹狀圖，通常需要一個**圖形介面 (GUI)** 的軟體。這一步無法在命令列中直接完成，你需要將 `phylogenetic_tree.nwk` 檔案下載到你的個人電腦上，然後使用以下軟體開啟：
+
+1.  **FigTree** (推薦，免費且常用)：
+
+      * 下載網址：[http://tree.bio.ed.ac.uk/software/figtree/](http://tree.bio.ed.ac.uk/software/figtree/)
+      * 這是一個跨平台軟體，支援 Windows, macOS, Linux。你可以載入 `.nwk` 檔案，然後調整樹的樣式、標籤、顏色等。
+
+2.  **iTOL (Interactive Tree Of Life)** (線上工具)：
+
+      * 網址：[https://itol.embl.de/](https://itol.embl.de/)
+      * 這是一個強大的線上工具，你可以上傳你的 `.nwk` 檔案，它會幫你繪製並提供豐富的註釋功能。
+
+-----
+
+### **總結流程與指令懶人包**
+
+以下是從頭到尾的所有指令，假設你已經安裝了 MAFFT 和 FastTree。
+
+```bash
+# --- Part 0: 環境設定與工具安裝 (請根據你的系統安裝 MAFFT 和 FastTree) ---
+# For Ubuntu/Debian:
+# sudo apt update
+# sudo apt install mafft fasttree
+
+# For CentOS/Fedora:
+# sudo yum install mafft fasttree # 或 sudo dnf install mafft fasttree
+
+# (假設你已經在 /my_blast_project/ 資料夾下，並已下載 more_sequences.fasta)
+# --- Part 1: 多序列比對 (Multiple Sequence Alignment) ---
+echo "--- 正在執行 MAFFT 多序列比對 ---"
+mafft --auto more_sequences.fasta > aligned_sequences.fasta
+echo "比對完成，結果儲存至 aligned_sequences.fasta"
+
+# --- Part 2: 建構演化樹 (Phylogenetic Tree Construction) ---
+echo "--- 正在執行 FastTree 建構演化樹 ---"
+FastTree -nt -gtr -gamma -out phylogenetic_tree.nwk aligned_sequences.fasta
+echo "演化樹建構完成，結果儲存至 phylogenetic_tree.nwk (Newick 格式)"
+
+# --- Part 3: 查看演化樹檔案 (文字格式) ---
+echo "--- 演化樹檔案內容 (Newick 格式) ---"
+cat phylogenetic_tree.nwk
+
+# --- Part 4: 視覺化提醒 ---
+echo "--- 重要：請將 phylogenetic_tree.nwk 下載到你的電腦 ---"
+echo "然後使用 FigTree (軟體) 或 iTOL (線上工具) 進行視覺化，才能看到樹狀圖。"
+```
+
+透過這些步驟，你就可以將那 12 條序列成功轉換為一個視覺化的演化樹，展示它們之間的親緣關係了！
+
